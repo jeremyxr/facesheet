@@ -8,6 +8,7 @@ interface FeedbackContext {
   y: number
   elementSelector: string
   feedbackId: string | null
+  screenshotDataUrl: string | null
 }
 
 function FeedbackProvider() {
