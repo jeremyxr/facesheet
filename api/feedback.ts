@@ -40,101 +40,65 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(500).json({ error: 'SLACK_BOT_TOKEN or SLACK_WEBHOOK_URL must be configured' })
   }
 
-  const { comment, userName, route, elementSelector, feedbackId, coordinates, timestamp, screenshotDataUrl } = req.body
+  const { comment, userName, route, timestamp, screenshotDataUrl } = req.body
 
-  const elementContext = feedbackId
-    ? `\`${feedbackId}\` (${elementSelector})`
-    : elementSelector || 'unknown'
-
-  const blocks = [
-    {
-      type: 'header',
-      text: {
-        type: 'plain_text',
-        text: `Feedback from ${userName || 'Anonymous'}`,
-      },
-    },
-    {
-      type: 'section',
-      text: {
-        type: 'mrkdwn',
-        text: `> ${comment}`,
-      },
-    },
-    {
-      type: 'context',
-      elements: [
-        {
-          type: 'mrkdwn',
-          text: `*Page:* ${route}  |  *Element:* ${elementContext}  |  *Position:* (${coordinates?.x}, ${coordinates?.y})  |  *Time:* ${new Date(timestamp).toLocaleString()}`,
-        },
-      ],
-    },
-    { type: 'divider' },
-  ]
+  const formattedTime = new Date(timestamp).toLocaleString()
+  const messageText = `*Feedback from ${userName || 'Anonymous'}*\n> ${comment}\n\n_Page:_ ${route}  |  _Time:_ ${formattedTime}`
 
   try {
-    // If bot token is configured, use the Slack API (supports screenshot uploads)
     if (token && channelId) {
+      // If we have a screenshot, upload it with the message as initial_comment
+      if (screenshotDataUrl) {
+        const base64Data = screenshotDataUrl.replace(/^data:image\/[^;]+;base64,/, '')
+        const buffer = Buffer.from(base64Data, 'base64')
+
+        const uploadRes = await slackFormApi('files.getUploadURLExternal', token, {
+          filename: `feedback-${Date.now()}.jpg`,
+          length: String(buffer.length),
+        })
+
+        if (uploadRes.ok && uploadRes.upload_url && uploadRes.file_id) {
+          await fetch(uploadRes.upload_url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/octet-stream' },
+            body: buffer,
+          })
+
+          await slackApi('files.completeUploadExternal', token, {
+            files: [{ id: uploadRes.file_id, title: `Screenshot from ${route}` }],
+            channel_id: channelId,
+            initial_comment: messageText,
+          })
+
+          return res.status(200).json({ ok: true })
+        }
+      }
+
+      // No screenshot or upload failed — post text-only message
       const messageRes = await slackApi('chat.postMessage', token, {
         channel: channelId,
-        blocks,
+        text: messageText,
       })
 
       if (!messageRes.ok) {
         return res.status(502).json({ error: `Slack message failed: ${messageRes.error}` })
       }
 
-      // Upload screenshot as a thread reply if provided
-      const debugInfo: Record<string, unknown> = {
-        mode: 'bot_token',
-        hasScreenshot: !!screenshotDataUrl,
-        screenshotLength: screenshotDataUrl?.length ?? 0,
-      }
-
-      if (screenshotDataUrl && messageRes.ts) {
-        const base64Data = screenshotDataUrl.replace(/^data:image\/[^;]+;base64,/, '')
-        const buffer = Buffer.from(base64Data, 'base64')
-        debugInfo.bufferSize = buffer.length
-
-        const uploadRes = await slackFormApi('files.getUploadURLExternal', token, {
-          filename: `feedback-${Date.now()}.jpg`,
-          length: String(buffer.length),
-        })
-        debugInfo.uploadRes = { ok: uploadRes.ok, error: uploadRes.error }
-
-        if (uploadRes.ok && uploadRes.upload_url && uploadRes.file_id) {
-          const fileUploadRes = await fetch(uploadRes.upload_url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/octet-stream' },
-            body: buffer,
-          })
-          debugInfo.fileUploadStatus = fileUploadRes.status
-
-          const completeRes = await slackApi('files.completeUploadExternal', token, {
-            files: [{ id: uploadRes.file_id, title: `Screenshot from ${route}` }],
-            channel_id: channelId,
-            thread_ts: messageRes.ts,
-          })
-          debugInfo.completeRes = { ok: completeRes.ok, error: completeRes.error }
-        }
-      }
-
-      return res.status(200).json({ ok: true, debug: debugInfo })
+      return res.status(200).json({ ok: true })
     }
 
-    // Fallback: use webhook (no screenshot support)
+    // Fallback: webhook (no screenshot support)
     const slackRes = await fetch(webhookUrl!, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ blocks }),
+      body: JSON.stringify({ text: messageText }),
     })
 
     if (!slackRes.ok) {
       return res.status(502).json({ error: 'Slack webhook failed' })
     }
 
-    return res.status(200).json({ ok: true, debug: { mode: 'webhook' } })
+    return res.status(200).json({ ok: true })
   } catch {
     return res.status(502).json({ error: 'Failed to reach Slack' })
   }
