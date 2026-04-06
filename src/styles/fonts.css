@@ -1,0 +1,62 @@
+@font-face {
+  font-family: 'ProximaNova';
+  src: url('/fonts/proximanova-thin-webfont.woff2') format('woff2'),
+       url('/fonts/proximanova-thin-webfont.woff') format('woff');
+  font-weight: 200;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'ProximaNova';
+  src: url('/fonts/proximanova-light-webfont.woff2') format('woff2'),
+       url('/fonts/proximanova-light-webfont.woff') format('woff');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'ProximaNova';
+  src: url('/fonts/proximanova-janesymbols-webfont.woff2') format('woff2'),
+       url('/fonts/proximanova-janesymbols-webfont.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'ProximaNova';
+  src: url('/fonts/proximanova-sbold-webfont.woff2') format('woff2'),
+       url('/fonts/proximanova-sbold-webfont.woff') format('woff');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'ProximaNova';
+  src: url('/fonts/proximanova-bold-janesymbols-webfont.woff2') format('woff2'),
+       url('/fonts/proximanova-bold-janesymbols-webfont.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'ProximaNova';
+  src: url('/fonts/proximanova-light-italic-webfont.woff2') format('woff2'),
+       url('/fonts/proximanova-light-italic-webfont.woff') format('woff');
+  font-weight: 300;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'ProximaNova';
+  src: url('/fonts/proximanova-sbold-italic-webfont.woff2') format('woff2'),
+       url('/fonts/proximanova-sbold-italic-webfont.woff') format('woff');
+  font-weight: 600;
+  font-style: italic;
+  font-display: swap;
+}
