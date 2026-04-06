@@ -68,34 +68,43 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     // Upload screenshot as a thread reply if provided
+    const debugInfo: Record<string, unknown> = {
+      hasScreenshot: !!screenshotDataUrl,
+      screenshotLength: screenshotDataUrl?.length ?? 0,
+    }
+
     if (screenshotDataUrl && messageRes.ts) {
-      const base64Data = screenshotDataUrl.replace(/^data:image\/\w+;base64,/, '')
+      const base64Data = screenshotDataUrl.replace(/^data:image\/[^;]+;base64,/, '')
       const buffer = Buffer.from(base64Data, 'base64')
+      debugInfo.bufferSize = buffer.length
 
       // Step 1: Get an upload URL from Slack
       const uploadRes = await slackApi('files.getUploadURLExternal', token, {
-        filename: `feedback-${Date.now()}.png`,
+        filename: `feedback-${Date.now()}.jpg`,
         length: buffer.length,
       })
+      debugInfo.uploadRes = { ok: uploadRes.ok, error: uploadRes.error }
 
       if (uploadRes.ok && uploadRes.upload_url && uploadRes.file_id) {
         // Step 2: Upload the file bytes
-        await fetch(uploadRes.upload_url, {
+        const fileUploadRes = await fetch(uploadRes.upload_url, {
           method: 'POST',
           headers: { 'Content-Type': 'application/octet-stream' },
           body: buffer,
         })
+        debugInfo.fileUploadStatus = fileUploadRes.status
 
         // Step 3: Complete the upload and share in the thread
-        await slackApi('files.completeUploadExternal', token, {
+        const completeRes = await slackApi('files.completeUploadExternal', token, {
           files: [{ id: uploadRes.file_id, title: `Screenshot from ${route}` }],
           channel_id: channelId,
           thread_ts: messageRes.ts,
         })
+        debugInfo.completeRes = { ok: completeRes.ok, error: completeRes.error }
       }
     }
 
-    return res.status(200).json({ ok: true })
+    return res.status(200).json({ ok: true, debug: debugInfo })
   } catch {
     return res.status(502).json({ error: 'Failed to reach Slack' })
   }
