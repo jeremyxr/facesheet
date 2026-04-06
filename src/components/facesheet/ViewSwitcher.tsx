@@ -12,7 +12,7 @@ interface ViewSwitcherProps {
   onNewView: () => void
 }
 
-function ViewSwitcher({ activeViewId, patientId, hasPatientOverride, onSelectView, onNewView }: ViewSwitcherProps) {
+function ViewSwitcher({ activeViewId, hasPatientOverride, onSelectView, onNewView }: ViewSwitcherProps) {
   const { views, updateView } = useViewsStore()
   const { isEditMode } = useFacesheetEditorStore()
   const activeView = views.find((v) => v.id === activeViewId)

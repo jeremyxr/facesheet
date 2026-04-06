@@ -4,7 +4,7 @@ import { cn } from '../../lib/cn'
 
 const STANDALONE_ITEMS = [
   { label: 'Dashboard', href: '/settings/dashboard' },
-  { label: 'Account Recommendations', href: '/settings/account-recommendations', badge: { text: '2', style: 'dark' } },
+  { label: 'Account Recommendations', href: '/settings/account-recommendations', badge: { text: '2', style: 'dark' as const } },
   { label: 'Jane Payments', href: '/settings/jane-payments' },
   { label: 'Address Book', href: '/settings/address-book' },
 ]
@@ -23,7 +23,7 @@ const SETTINGS_ITEMS = [
   { label: 'Integrations', href: '/settings/integrations' },
   { label: 'Workshop', href: '/settings/workshop' },
   { label: 'Language', href: '/settings/language' },
-  { label: 'Messaging', href: '/settings/messaging', badge: { text: 'BETA', style: 'beta' } },
+  { label: 'Messaging', href: '/settings/messaging', badge: { text: 'BETA', style: 'beta' as const } },
   { label: 'Staff Permissions', href: '/settings/staff-permissions' },
   { label: 'Dashboard Permissions', href: '/settings/dashboard-permissions' },
   { label: 'Supervision', href: '/settings/supervision' },

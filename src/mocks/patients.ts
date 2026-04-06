@@ -33,7 +33,6 @@ const PRONOUNS_F = ['she/her', 'she/they', undefined]
 const PRONOUNS_M = ['he/him', 'he/they', undefined]
 const PRONOUNS_NB = ['they/them', 'ze/zir']
 
-const SEXES: Patient['sex'][] = ['Male', 'Female', 'Other', 'Unknown']
 const GENDER_MAP: Record<string, string[]> = {
   Male: ['Man', 'Man', 'Man', 'Non-binary'],
   Female: ['Woman', 'Woman', 'Woman', 'Non-binary'],

@@ -10,7 +10,7 @@ import { cn } from '../lib/cn'
 import { MOCK_PATIENTS } from '../mocks/patients'
 import { Button } from '../components/ui/Button'
 import type { Patient } from '../types/patient'
-import { FilterDropdown, ActiveFilterChips, applyFilters, countActiveFilters } from '../components/patient/FilterDropdown'
+import { FilterDropdown, ActiveFilterChips, applyFilters } from '../components/patient/FilterDropdown'
 import type { FilterState } from '../components/patient/FilterDropdown'
 import { ColumnPicker, COLUMN_DEFS, DEFAULT_COLUMNS } from '../components/patient/ColumnPicker'
 
@@ -83,20 +83,17 @@ function getStatuses(p: Patient): StatusTag[] {
 
 // Map card filter IDs to FilterState entries
 const CARD_FILTER_MAP: Record<CardFilterId, (current: FilterState) => FilterState> = {
-  active: (cur) => cur.active ? {} : { active: { type: 'multi-select', selected: new Set(['yes']) } },
+  active: (cur) => cur.active ? ({} as FilterState) : { active: { type: 'multi-select', selected: new Set(['yes']) } },
   seenThisMonth: (cur) => {
-    // "Seen this month" = lastActivityDate in current month
-    if (cur.lastActivityDate) return {}
+    if (cur.lastActivityDate) return {} as FilterState
     return { lastActivityDate: { type: 'date-range', from: '2026-03-01', to: '2026-03-31' } }
   },
   hasUpcoming: (cur) => {
-    // Reuse the "Active patients" concept — upcoming appointments > 0
-    // This maps to: active patients filter with "yes"
-    if (cur.active?.type === 'multi-select' && cur.active.selected.has('yes') && Object.keys(cur).length === 1) return {}
+    if (cur.active?.type === 'multi-select' && cur.active.selected.has('yes') && Object.keys(cur).length === 1) return {} as FilterState
     return { active: { type: 'multi-select', selected: new Set(['yes']) } }
   },
-  hasBalance: (cur) => cur.hasBalance ? {} : { hasBalance: { type: 'multi-select', selected: new Set(['yes']) } },
-  needsFollowUp: (cur) => cur.needsFollowUp ? {} : { needsFollowUp: { type: 'multi-select', selected: new Set(['yes']) } },
+  hasBalance: (cur) => cur.hasBalance ? ({} as FilterState) : { hasBalance: { type: 'multi-select', selected: new Set(['yes']) } },
+  needsFollowUp: (cur) => cur.needsFollowUp ? ({} as FilterState) : { needsFollowUp: { type: 'multi-select', selected: new Set(['yes']) } },
 }
 
 function formatReferralSource(source: string) {
@@ -300,7 +297,6 @@ function PatientListPage() {
   const allSelected = sorted.length > 0 && selected.size === sorted.length
   const someSelected = selected.size > 0 && !allSelected
   const isCompact = density === 'compact'
-  const activeFilterCount = countActiveFilters(filterState)
 
   const activeColumns = COLUMN_DEFS.filter((c) => visibleColumns.includes(c.id))
   const colCount = activeColumns.length + 1

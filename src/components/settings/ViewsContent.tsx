@@ -161,46 +161,6 @@ function AiBuilder({ onApply }: { onApply: (cards: ViewCardPlacement[]) => void 
   )
 }
 
-// ─── View Selector ───────────────────────────────────────────────────
-
-function ViewSelector({
-  activeViewId,
-  onSelect,
-  onNew,
-}: {
-  activeViewId: string
-  onSelect: (id: string) => void
-  onNew: () => void
-}) {
-  const { views } = useViewsStore()
-
-  return (
-    <div className="flex items-center gap-2 flex-wrap">
-      {views.map((view) => (
-        <button
-          key={view.id}
-          onClick={() => onSelect(view.id)}
-          className={cn(
-            'px-3 py-1.5 text-[12px] font-medium rounded-[var(--radius-md)] border transition-colors',
-            activeViewId === view.id
-              ? 'bg-[var(--color-brand-primary)] text-white border-[var(--color-brand-primary)]'
-              : 'bg-white text-[var(--color-text-primary)] border-[var(--color-border-subtle)] hover:bg-[var(--color-bg-subtle)]'
-          )}
-        >
-          {view.name}
-        </button>
-      ))}
-      <button
-        onClick={onNew}
-        className="flex items-center gap-1 px-3 py-1.5 text-[12px] font-medium rounded-[var(--radius-md)] border border-dashed border-[var(--color-border-default)] text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:border-[var(--color-border-subtle)] transition-colors"
-      >
-        <Plus size={12} />
-        New View
-      </button>
-    </div>
-  )
-}
-
 // ─── Scope Toggle (Global / Local) ──────────────────────────────────
 
 function ScopeToggle({

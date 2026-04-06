@@ -3,7 +3,7 @@ import { Navigate, useParams, NavLink, useNavigate } from 'react-router-dom'
 import {
   User, FileText, Stethoscope, Heart, ClipboardList, FolderOpen,
   FlaskConical, CalendarDays, MessageSquare, Dumbbell, DollarSign,
-  Settings, Pin, ArrowRight, ArrowLeft, UserCircle,
+  Settings, ArrowRight, ArrowLeft, UserCircle,
   Pencil, X, Undo2,
 } from 'lucide-react'
 import { cn } from '../lib/cn'
@@ -131,7 +131,6 @@ function EditToggleButton({ onEnterEdit }: { onEnterEdit?: () => void }) {
 function PatientProfileHeader({ patient, viewControls, onEnterEdit }: { patient: Patient; viewControls?: React.ReactNode; onEnterEdit?: () => void }) {
   const fullName = `${patient.firstName} ${patient.lastName}`
   const isActive = !patient.flags.isDischarged && !patient.flags.isDeceased && patient.stats.monthsSinceLastVisit < 12
-  const hasBalance = patient.stats.claimsOutstanding + patient.stats.privateOutstanding > 0
 
   return (
     <div className="bg-white border-b border-[var(--color-border-subtle)]" data-feedback-id="patient-header">
@@ -194,7 +193,7 @@ function PatientProfileHeader({ patient, viewControls, onEnterEdit }: { patient:
 // ─── Edit mode toolbar ──────────────────────────────────────────────
 
 function EditModeToolbar({ onSave }: { onSave: () => void }) {
-  const { isEditMode, isDirty, resetDraft, undo, canUndo, setEditMode } = useFacesheetEditorStore()
+  const { isEditMode, isDirty, undo, canUndo, setEditMode } = useFacesheetEditorStore()
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -457,7 +456,7 @@ function FacesheetContent({ patient }: { patient: Patient }) {
     e.dataTransfer.dropEffect = 'move'
   }
 
-  function handleDropOnCard(targetCardId: string, targetZone: string, targetIndex: number) {
+  function handleDropOnCard(_targetCardId: string, targetZone: string, targetIndex: number) {
     if (!dragInfo) return
     const updated = reorderCards(draftCards, dragInfo.cardId, targetZone, targetIndex)
     updateDraftCards(updated)
@@ -472,15 +471,6 @@ function FacesheetContent({ patient }: { patient: Patient }) {
   }
 
   function handleRemoveCard(cardId: string) {
-    const updated = draftCards
-      .filter((c) => c.cardId !== cardId)
-      .map((c, _i, arr) => {
-        // Re-index within each zone
-        const zoneCards = arr.filter((cc) => cc.zone === c.zone)
-        const idx = zoneCards.indexOf(c)
-        return { ...c, order: idx }
-      })
-    // Dedupe re-indexing
     const result: ViewCardPlacement[] = []
     const zones = ['pinned', 'main', 'sidebar'] as const
     for (const z of zones) {

@@ -3,7 +3,6 @@ import { Sparkles, ArrowRight, Loader2 } from 'lucide-react'
 import { cn } from '../../lib/cn'
 import { useFacesheetEditorStore } from '../../stores/facesheetEditorStore'
 import { generateViewFromPrompt, clearConversationHistory } from '../../lib/claudeViewAgent'
-import { getCardDefinition } from '../../lib/cardRegistry'
 
 const SUGGESTIONS = [
   'Clinical overview',
@@ -16,7 +15,7 @@ const SUGGESTIONS = [
 function AiPromptBar({ patientName }: { patientName: string }) {
   const [prompt, setPrompt] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
-  const { draftCards, updateDraftCards, setEditMode, aiState, setAiState, initDraft, baseViewId } =
+  const { draftCards, updateDraftCards, setEditMode, aiState, setAiState } =
     useFacesheetEditorStore()
 
   async function handleSubmit() {

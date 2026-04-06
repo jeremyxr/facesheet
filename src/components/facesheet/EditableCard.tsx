@@ -6,7 +6,7 @@ import type { Patient } from '../../types/patient'
 interface EditableCardProps {
   cardId: string
   zone: 'pinned' | 'main' | 'sidebar'
-  width?: 1 | 2
+  width?: 1 | 2 | 3
   index: number
   patient: Patient
   Component: ComponentType<{ patient: Patient }>

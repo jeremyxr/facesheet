@@ -3,7 +3,7 @@ import {
   MessageSquare, Reply, Calendar, DollarSign, Send,
   Phone, Mail, TrendingUp, ClipboardList, Plus,
   Target, ArrowRight, Bell, Clock, Activity,
-  BarChart3, LineChart, Gauge, Hash, User,
+  BarChart3, User,
   FileText, Shield, Stethoscope, ChevronDown, ChevronRight,
   ExternalLink, MousePointerClick,
 } from 'lucide-react'

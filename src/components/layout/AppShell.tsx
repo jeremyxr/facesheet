@@ -10,7 +10,6 @@ interface AppShellProps {
 function AppShell({ children }: AppShellProps) {
   const location = useLocation()
   const { patientManagementEnabled } = useWorkshopStore()
-  const isPatientList = location.pathname === '/patients'
   const isPatientSettings = location.pathname.startsWith('/patients/settings')
   // Show the old patient list sidebar only when the new patient management is OFF
   // When ON, the PatientPage has its own internal nav sidebar
