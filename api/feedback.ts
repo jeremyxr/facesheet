@@ -1,5 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 
+type SlackResponse = { ok: boolean; ts?: string; upload_url?: string; file_id?: string; error?: string }
+
 async function slackApi(method: string, token: string, body: Record<string, unknown>) {
   const res = await fetch(`https://slack.com/api/${method}`, {
     method: 'POST',
@@ -9,7 +11,20 @@ async function slackApi(method: string, token: string, body: Record<string, unkn
     },
     body: JSON.stringify(body),
   })
-  return res.json() as Promise<{ ok: boolean; ts?: string; upload_url?: string; file_id?: string; error?: string }>
+  return res.json() as Promise<SlackResponse>
+}
+
+async function slackFormApi(method: string, token: string, params: Record<string, string>) {
+  const form = new URLSearchParams(params)
+  const res = await fetch(`https://slack.com/api/${method}`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: form.toString(),
+  })
+  return res.json() as Promise<SlackResponse>
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -82,9 +97,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const buffer = Buffer.from(base64Data, 'base64')
         debugInfo.bufferSize = buffer.length
 
-        const uploadRes = await slackApi('files.getUploadURLExternal', token, {
+        const uploadRes = await slackFormApi('files.getUploadURLExternal', token, {
           filename: `feedback-${Date.now()}.jpg`,
-          length: buffer.length,
+          length: String(buffer.length),
         })
         debugInfo.uploadRes = { ok: uploadRes.ok, error: uploadRes.error }
 
