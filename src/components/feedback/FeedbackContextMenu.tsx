@@ -121,12 +121,12 @@ function FeedbackContextMenu({ onAddFeedback }: Props) {
           try {
             const canvas = await html2canvas(document.body, {
               useCORS: true,
-              scale: 1,
+              scale: window.devicePixelRatio > 1 ? 0.5 : 1,
               logging: false,
             })
-            screenshotDataUrl = canvas.toDataURL('image/png')
-          } catch {
-            // Proceed without screenshot if capture fails
+            screenshotDataUrl = canvas.toDataURL('image/jpeg', 0.7)
+          } catch (err) {
+            console.warn('Screenshot capture failed:', err)
           }
 
           onAddFeedback({

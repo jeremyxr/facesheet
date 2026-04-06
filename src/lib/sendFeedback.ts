@@ -10,6 +10,8 @@ export async function sendFeedbackToSlack(
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ...item, screenshotDataUrl }),
     })
+    const data = await res.json()
+    console.log('[feedback] API response:', data)
     return res.ok
   } catch {
     return false
