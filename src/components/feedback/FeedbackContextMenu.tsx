@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { MessageSquarePlus } from 'lucide-react'
+import html2canvas from 'html2canvas-pro'
 
 interface ContextMenuState {
   visible: boolean
@@ -15,6 +16,7 @@ interface Props {
     y: number
     elementSelector: string
     feedbackId: string | null
+    screenshotDataUrl: string | null
   }) => void
 }
 
@@ -110,15 +112,30 @@ function FeedbackContextMenu({ onAddFeedback }: Props) {
     >
       <button
         className="w-full flex items-center gap-2.5 px-3 py-2 text-[13px] text-[var(--color-text-primary)] hover:bg-[var(--color-bg-subtle)] transition-colors text-left"
-        onMouseDown={(e) => {
+        onMouseDown={async (e) => {
           e.stopPropagation()
+          setMenu((prev) => ({ ...prev, visible: false }))
+
+          // Capture screenshot before the feedback form overlay renders
+          let screenshotDataUrl: string | null = null
+          try {
+            const canvas = await html2canvas(document.body, {
+              useCORS: true,
+              scale: 1,
+              logging: false,
+            })
+            screenshotDataUrl = canvas.toDataURL('image/png')
+          } catch {
+            // Proceed without screenshot if capture fails
+          }
+
           onAddFeedback({
             x: menu.x,
             y: menu.y,
             elementSelector: menu.targetSelector,
             feedbackId: menu.feedbackId,
+            screenshotDataUrl,
           })
-          setMenu((prev) => ({ ...prev, visible: false }))
         }}
       >
         <MessageSquarePlus size={14} className="text-[var(--color-brand-primary)]" />

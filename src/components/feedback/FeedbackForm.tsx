@@ -9,6 +9,7 @@ interface Props {
     y: number
     elementSelector: string
     feedbackId: string | null
+    screenshotDataUrl: string | null
   }
   onClose: () => void
 }
@@ -49,7 +50,7 @@ function FeedbackForm({ context, onClose }: Props) {
       viewportSize: { width: window.innerWidth, height: window.innerHeight },
     })
 
-    const sent = await sendFeedbackToSlack(item)
+    const sent = await sendFeedbackToSlack(item, context.screenshotDataUrl)
     if (sent) {
       markSent(item.id)
     } else {
