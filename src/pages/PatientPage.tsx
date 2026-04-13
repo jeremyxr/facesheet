@@ -20,6 +20,7 @@ import { EditableCard } from '../components/facesheet/EditableCard'
 import { DropZone } from '../components/facesheet/DropZone'
 import { CardPicker } from '../components/facesheet/CardPicker'
 import { SavePrompt } from '../components/facesheet/SavePrompt'
+import { SuggestiveActions } from '../components/facesheet/SuggestiveActions'
 import { ViewSwitcher } from '../components/facesheet/ViewSwitcher'
 import type { Patient } from '../types/patient'
 import type { ViewCardPlacement } from '../types/views'
@@ -333,7 +334,7 @@ function PinnedZone({
           </button>
         )}
       </div>
-      <div className="flex gap-3 items-start">
+      <div className="grid grid-cols-2 gap-4 items-stretch">
         {cards.map((placement, idx) => {
           const Component = CARD_COMPONENTS[placement.cardId]
           if (!Component) return null
@@ -356,15 +357,15 @@ function PinnedZone({
             )
           }
 
-          return <div key={placement.cardId} data-feedback-id={`card:${placement.cardId}`}><Component patient={patient} /></div>
+          return <div key={placement.cardId} className="[&>div]:h-full" data-feedback-id={`card:${placement.cardId}`}><Component patient={patient} /></div>
         })}
         {isEditMode && (
-          <div className="flex gap-3 items-start">
+          <>
             {dragInfo && (
               <DropZone zone="pinned" index={cards.length} onDrop={onDropOnZone} label="Drop in pinned" />
             )}
             <CardPicker currentCards={allDraftCards} onAdd={onAddCard} />
-          </div>
+          </>
         )}
       </div>
     </div>
@@ -530,6 +531,7 @@ function FacesheetContent({ patient }: { patient: Patient }) {
         {/* Left: AI bar, toolbar, pinned, main cards */}
         <div className="flex-1 min-w-0">
           <AiPromptBar patientName={`${patient.firstName} ${patient.lastName}`} />
+          {!isEditMode && <SuggestiveActions patient={patient} />}
           <EditModeToolbar onSave={() => setShowSavePrompt(true)} />
           <PinnedZone
             cards={pinnedCards}
