@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Sparkles, ArrowRight, Loader2 } from 'lucide-react'
 import { cn } from '../../lib/cn'
 import { useFacesheetEditorStore } from '../../stores/facesheetEditorStore'
@@ -14,7 +14,9 @@ const SUGGESTIONS = [
 
 function AiPromptBar({ patientName }: { patientName: string }) {
   const [prompt, setPrompt] = useState('')
+  const [isFocused, setIsFocused] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
   const { draftCards, updateDraftCards, setEditMode, aiState, setAiState } =
     useFacesheetEditorStore()
 
@@ -60,8 +62,20 @@ function AiPromptBar({ patientName }: { patientName: string }) {
 
   const isLoading = aiState.status === 'loading'
 
+  // Close chips on click outside
+  useEffect(() => {
+    if (!isFocused) return
+    function handleClickOutside(e: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setIsFocused(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [isFocused])
+
   return (
-    <div className="px-6 py-3 space-y-2">
+    <div ref={containerRef} className="px-6 py-3 space-y-2">
       {/* Input */}
       <div className="relative">
         <Sparkles
@@ -77,6 +91,7 @@ function AiPromptBar({ patientName }: { patientName: string }) {
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
           onKeyDown={handleKeyDown}
+          onFocus={() => setIsFocused(true)}
           placeholder={`What would you like to know about ${patientName}?`}
           disabled={isLoading}
           className="w-full pl-9 pr-20 py-2 text-[13px] bg-white border border-[var(--color-border-subtle)] rounded-[var(--radius-md)] text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:border-[var(--color-brand-primary)] transition-colors disabled:opacity-60"
@@ -138,8 +153,8 @@ function AiPromptBar({ patientName }: { patientName: string }) {
         <div className="text-[11px] text-[var(--color-danger)]">{aiState.error}</div>
       )}
 
-      {/* Suggestion chips — show when idle with no recent result */}
-      {!isLoading && !aiState.explanation && aiState.status !== 'error' && (
+      {/* Suggestion chips — show when focused and idle with no recent result */}
+      {isFocused && !isLoading && !aiState.explanation && aiState.status !== 'error' && (
         <div className="flex gap-1.5 flex-wrap">
           {SUGGESTIONS.map((s) => (
             <button
